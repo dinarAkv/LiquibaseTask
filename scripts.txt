@@ -1,0 +1,2 @@
+1.Run liquibase through maven:
+mvn liquibase:update

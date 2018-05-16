@@ -1,0 +1,96 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="dinar">
+        <createTable tableName="organization">
+            <column autoIncrement="true" name="organization_ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="product">
+            <column name="product_ID" autoIncrement="true" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="location">
+            <column name="location_ID" autoIncrement="true" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="city" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="address" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="contract">
+            <column name="contract_ID" autoIncrement="true" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="amount" type="money">
+                <constraints nullable="false" />
+            </column>
+            <column name="details" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="shipment">
+            <column name="shipment_ID" autoIncrement="true" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="date_real" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="date_expect" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="payment">
+            <column name="payment_ID" autoIncrement="true" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="money">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="organization_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_organization_payment"
+                             references="organization(organization_ID)"
+                />
+            </column>
+            <column name="product_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_product_payment" references="product(product_ID)" />
+            </column>
+            <column name="location_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_location_payment" references="location(location_ID)"/>
+            </column>
+            <column name="contract_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_contract_payment" references="contract(contract_ID)"/>
+            </column>
+            <column name="shipment_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_shipment_Payment" references="shipment(shipment_ID)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
