@@ -6,7 +6,7 @@
 
     <changeSet id="1" author="dinar">
         <createTable tableName="organization">
-            <column autoIncrement="true" name="organization_ID" type="BIGINT">
+            <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="name" type="varchar(255)">
@@ -15,7 +15,7 @@
         </createTable>
 
         <createTable tableName="product">
-            <column name="product_ID" autoIncrement="true" type="BIGINT">
+            <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="name" type="varchar(255)">
@@ -24,7 +24,7 @@
         </createTable>
 
         <createTable tableName="location">
-            <column name="location_ID" autoIncrement="true" type="BIGINT">
+            <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="city" type="varchar(255)">
@@ -36,7 +36,7 @@
         </createTable>
 
         <createTable tableName="contract">
-            <column name="contract_ID" autoIncrement="true" type="BIGINT">
+            <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="amount" type="money">
@@ -48,7 +48,7 @@
         </createTable>
 
         <createTable tableName="shipment">
-            <column name="shipment_ID" autoIncrement="true" type="BIGINT">
+            <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="date_real" type="timestamp">
@@ -59,8 +59,12 @@
             </column>
         </createTable>
 
+
+    </changeSet>
+
+    <changeSet id="2" author="dinar">
         <createTable tableName="payment">
-            <column name="payment_ID" autoIncrement="true" type="BIGINT">
+            <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="type" type="varchar(255)">
@@ -73,24 +77,29 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="organization_ID" type="BIGINT">
+            <column name="organization_id" type="BIGINT">
                 <constraints nullable="false" foreignKeyName="fk_organization_payment"
-                             references="organization(organization_ID)"
+                             references="organization(id)"
                 />
             </column>
             <column name="product_ID" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="fk_product_payment" references="product(product_ID)" />
+                <constraints nullable="false" foreignKeyName="fk_product_payment" references="product(id)" />
             </column>
             <column name="location_ID" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="fk_location_payment" references="location(location_ID)"/>
+                <constraints nullable="false" foreignKeyName="fk_location_payment" references="location(id)"/>
             </column>
             <column name="contract_ID" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="fk_contract_payment" references="contract(contract_ID)"/>
+                <constraints nullable="false" foreignKeyName="fk_contract_payment" references="contract(id)"/>
             </column>
             <column name="shipment_ID" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="fk_shipment_Payment" references="shipment(shipment_ID)"/>
+                <constraints nullable="false" foreignKeyName="fk_shipment_Payment" references="shipment(id)"/>
             </column>
         </createTable>
     </changeSet>
 
 </databaseChangeLog>
+
+
+
+
+
