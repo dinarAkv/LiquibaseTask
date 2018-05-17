@@ -1,2 +1,5 @@
 1.Run liquibase through maven:
 mvn liquibase:update
+
+2. Get next value from sequence 'organization_id_seq':
+SELECT nextval('organization_id_seq')
