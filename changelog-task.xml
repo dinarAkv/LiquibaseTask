@@ -7,11 +7,18 @@
     <!-- Set ids from sequences using command: SELECT nextval('tableName_id_seq'). -->
     <property name="organization_id_10" value="10" />
     <property name="organization_id_12" value="12" />
+
     <property name="contract_id_10" value="10" />
+
     <property name="location_id_10" value="10" />
+
     <property name="payment_id_10" value="10" />
+
     <property name="product_id_10" value="10" />
+
     <property name="shipment_id_10" value="10" />
+
+    <property name="audit_id_10" value="10" />
 
 
     <!--<changeSet id="clear_data" author="dinar">-->
@@ -28,6 +35,14 @@
         <!--<dropSequence sequenceName="payment_id_seq" />-->
         <!--<dropSequence sequenceName="product_id_seq" />-->
         <!--<dropSequence sequenceName="shipment_id_seq" />-->
+        <!--<dropSequence sequenceName="audit_id_seq" />-->
+
+        <!--<sql dbms="postgresql" endDelimiter=";">-->
+            <!--DROP TRIGGER contract_amount_more_1000 ON contract-->
+        <!--</sql>-->
+        <!--<sql dbms="postgresql" endDelimiter=";">-->
+            <!--DROP FUNCTION add_record_to_audit()-->
+        <!--</sql>-->
     <!--</changeSet>-->
 
 
@@ -87,11 +102,6 @@
             </column>
         </createTable>
 
-
-    </changeSet>
-
-    <!-- Set constraints. -->
-    <changeSet id="set_constraints" author="dinar">
         <createTable tableName="payment">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
@@ -103,7 +113,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="amount" type="money">
-                <constraints nullable="false" checkConstraint="CHECK (amount &lt; 500)" />
+                <constraints nullable="false" />
             </column>
 
             <column name="organization_id" type="BIGINT">
@@ -124,9 +134,62 @@
                 <constraints nullable="false" foreignKeyName="fk_shipment_Payment" references="shipment(id)"/>
             </column>
         </createTable>
+
+        <createTable tableName="audit">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="contract_ident" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
     </changeSet>
 
-    <!--&lt;!&ndash; Set sequences. &ndash;&gt;-->
+
+    <!-- Set functions. -->
+    <changeSet id="create_funcs" author="dinar">
+        <createProcedure dbms="postgresql">
+            CREATE OR REPLACE FUNCTION add_record_to_audit()
+            RETURNS trigger AS
+            $$
+            DECLARE
+            new_audit_id bigint;
+            BEGIN
+            IF NEW.amount &gt; 1000 THEN
+            new_audit_id:= (SELECT nextval('audit_id_seq'));
+            INSERT INTO audit(id, contract_ident)
+            VALUES (new_audit_id, NEW.id);
+            end if;
+            RETURN NEW;
+            END
+            $$ LANGUAGE plpgsql;
+        </createProcedure>
+    </changeSet>
+
+
+    <changeSet id="create_triggers" author="dinar">
+        <sql dbms="postgresql">
+            CREATE TRIGGER contract_amount_more_1000
+            AFTER INSERT
+            ON contract
+            FOR EACH ROW
+            EXECUTE PROCEDURE add_record_to_audit();
+        </sql>
+    </changeSet>
+
+
+
+    <!-- Set constraints. -->
+    <changeSet id="set_constraints" author="dinar">
+        <!-- Payment amount restriction: amount < 500.  -->
+        <sql dbms="postgresql" endDelimiter=";" >ALTER TABLE payment ADD CONSTRAINT check_max_amount CHECK (amount &lt; 500)</sql>
+
+
+
+    </changeSet>
+
+
+    <!-- Set sequences. -->
     <changeSet id="create_sequences" author="dinar">
         <createSequence
                 sequenceName="organization_id_seq"
@@ -155,6 +218,11 @@
         />
         <createSequence
                 sequenceName="shipment_id_seq"
+                incrementBy="2"
+                startValue="10"
+        />
+        <createSequence
+                sequenceName="audit_id_seq"
                 incrementBy="2"
                 startValue="10"
         />
@@ -204,7 +272,7 @@
             <column name="id">${payment_id_10}</column>
             <column name="type">Payment for goods</column>
             <column name="date">2018-09-21</column>
-            <column name="amount">200</column>
+            <column name="amount">400</column>
             <column name="organization_id">${organization_id_10}</column>
             <column name="product_id">${product_id_10}</column>
             <column name="location_id">${location_id_10}</column>

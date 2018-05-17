@@ -3,3 +3,35 @@ mvn liquibase:update
 
 2. Get next value from sequence 'organization_id_seq':
 SELECT nextval('organization_id_seq')
+
+3. Script to debug function that insert row in audit when contract.amount > 1000:
+
+CREATE OR REPLACE FUNCTION add_record_to_audit()
+  RETURNS trigger AS
+  $$
+  DECLARE
+    new_audit_id bigint;
+  BEGIN
+    IF NEW.amount > 1000 THEN
+      new_audit_id:= (SELECT nextval('audit_id_seq'));
+      INSERT INTO audit(id, contract_ident)
+        VALUES (new_audit_id, NEW.id);
+    end if;
+    RETURN NEW;
+  END
+  $$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER contract_amount_more_1000
+  AFTER INSERT
+  ON contract
+  FOR EACH ROW
+  EXECUTE PROCEDURE add_record_to_audit();
+
+  DROP TRIGGER contract_amount_more_1000 ON contract;
+
+
+  INSERT INTO contract(id, amount, details)
+VALUES ((SELECT nextval('contract_id_seq')), 1500, 'detail23');
+
+  DROP FUNCTION add_record_to_audit();
