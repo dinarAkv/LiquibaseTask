@@ -11,6 +11,7 @@
     <property name="organization_id_14" value="14" />
     <property name="organization_id_16" value="16" />
     <!-- ========= -->
+    <property name="organization_id_18" value="18" />
 
     <property name="contract_id_10" value="10" />
     <!-- For debtors. -->
@@ -37,6 +38,15 @@
     <property name="shipment_id_14" value="14" />
     <property name="shipment_id_16" value="16" />
     <!-- =========== -->
+    <property name="shipment_id_18" value="18" />
+
+    <property name="shipment_product_id_10" value="10" />
+    <!-- For debtors. -->
+    <property name="shipment_product_id_12" value="12" />
+    <property name="shipment_product_id_14" value="14" />
+    <property name="shipment_product_id_16" value="16" />
+    <!-- =========== -->
+    <property name="shipment_product_id_18" value="18" />
 
     <property name="audit_id_10" value="10" />
 
@@ -126,6 +136,9 @@
         </createTable>
 
         <createTable tableName="shipment_product">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
             <column name="shipment_id" type="BIGINT">
                 <constraints nullable="false" foreignKeyName="fk_shipment_shipment_product"
                              references="shipment(id)" />
@@ -158,17 +171,15 @@
                              references="organization(id)"
                 />
             </column>
-            <column name="product_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="fk_product_payment" references="product(id)" />
-            </column>
             <column name="location_id" type="BIGINT">
                 <constraints nullable="false" foreignKeyName="fk_location_payment" references="location(id)"/>
             </column>
             <column name="contract_id" type="BIGINT">
                 <constraints nullable="false" foreignKeyName="fk_contract_payment" references="contract(id)"/>
             </column>
-            <column name="shipment_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="fk_shipment_Payment" references="shipment(id)"/>
+            <column name="shipment_product_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_shipment_product_payment"
+                             references="shipment_product(id)"/>
             </column>
         </createTable>
 
@@ -298,6 +309,11 @@
                 startValue="10"
         />
         <createSequence
+                sequenceName="shipment_product_id_seq"
+                incrementBy="2"
+                startValue="10"
+        />
+        <createSequence
                 sequenceName="audit_id_seq"
                 incrementBy="2"
                 startValue="10"
@@ -328,6 +344,10 @@
             <column name="name">DebtorOrg4</column>
         </insert>
         <!--===========-->
+        <insert tableName="organization">
+            <column name="id" valueComputed="(SELECT nextval('organization_id_seq'))" />
+            <column name="name">Org5</column>
+        </insert>
 
         <insert tableName="product">
             <column name="id" valueComputed="(SELECT nextval('product_id_seq'))" />
@@ -413,29 +433,47 @@
             <column name="is_delivered">true</column>
         </insert>
         <!--===========-->
+        <insert tableName="shipment">
+            <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
+            <column name="date_real">2018-03-21</column>
+            <column name="date_expect">2018-04-26</column>
+            <column name="is_delivered">true</column>
+        </insert>
+
 
         <insert tableName="shipment_product">
+            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
             <column name="shipment_id">${shipment_id_10}</column>
             <column name="product_id">${product_bred_id_10}</column>
             <column name="product_counter">5</column>
         </insert>
         <!-- For debtors. -->
         <insert tableName="shipment_product">
+            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
             <column name="shipment_id">${shipment_id_12}</column>
             <column name="product_id">${product_button_id_12}</column>
             <column name="product_counter">3</column>
         </insert>
         <insert tableName="shipment_product">
+            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
             <column name="shipment_id">${shipment_id_14}</column>
             <column name="product_id">${product_water_id_14}</column>
             <column name="product_counter">2</column>
         </insert>
         <insert tableName="shipment_product">
+            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
             <column name="shipment_id">${shipment_id_16}</column>
             <column name="product_id">${product_button_id_12}</column>
             <column name="product_counter">1</column>
         </insert>
         <!--===========-->
+        <insert tableName="shipment_product">
+            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
+            <column name="shipment_id">${shipment_id_18}</column>
+            <column name="product_id">${product_water_id_14}</column>
+            <column name="product_counter">9</column>
+        </insert>
+
     </changeSet>
 
     <changeSet id="6" author="dinar">
@@ -445,10 +483,9 @@
             <column name="date">2018-09-21</column>
             <column name="amount">400</column>
             <column name="organization_id">${organization_id_10}</column>
-            <column name="product_id">${product_bred_id_10}</column>
+            <column name="shipment_product_id">${shipment_product_id_10}</column>
             <column name="location_id">${location_moscow_id_10}</column>
             <column name="contract_id">${contract_id_10}</column>
-            <column name="shipment_id">${shipment_id_10}</column>
         </insert>
         <!-- For debtors. -->
         <insert tableName="payment">
@@ -457,10 +494,9 @@
             <column name="date">2018-04-21</column>
             <column name="amount">100</column>
             <column name="organization_id">${organization_id_12}</column>
-            <column name="product_id">${product_button_id_12}</column>
+            <column name="shipment_product_id">${shipment_product_id_12}</column>
             <column name="location_id">${location_smolensk_id_12}</column>
             <column name="contract_id">${contract_id_12}</column>
-            <column name="shipment_id">${shipment_id_12}</column>
         </insert>
         <insert tableName="payment">
             <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
@@ -468,10 +504,9 @@
             <column name="date">2018-03-12</column>
             <column name="amount">400</column>
             <column name="organization_id">${organization_id_14}</column>
-            <column name="product_id">${product_water_id_14}</column>
             <column name="location_id">${location_perm_id_14}</column>
             <column name="contract_id">${contract_id_14}</column>
-            <column name="shipment_id">${shipment_id_14}</column>
+            <column name="shipment_product_id">${shipment_product_id_14}</column>
         </insert>
         <insert tableName="payment">
             <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
@@ -479,10 +514,9 @@
             <column name="date">2018-01-25</column>
             <column name="amount">450</column>
             <column name="organization_id">${organization_id_16}</column>
-            <column name="product_id">${product_button_id_12}</column>
+            <column name="shipment_product_id">${shipment_product_id_16}</column>
             <column name="location_id">${location_smolensk_id_12}</column>
             <column name="contract_id">${contract_id_16}</column>
-            <column name="shipment_id">${shipment_id_16}</column>
         </insert>
         <!-- ============ -->
         <insert tableName="payment">
@@ -490,11 +524,10 @@
             <column name="type">Payment for goods</column>
             <column name="date">2018-04-21</column>
             <column name="amount">320</column>
-            <column name="organization_id">${organization_id_12}</column>
-            <column name="product_id">${product_button_id_12}</column>
+            <column name="organization_id">${organization_id_18}</column>
+            <column name="shipment_product_id">${shipment_product_id_18}</column>
             <column name="location_id">${location_smolensk_id_12}</column>
             <column name="contract_id">${contract_id_18}</column>
-            <column name="shipment_id">${shipment_id_12}</column>
         </insert>
     </changeSet>
 
