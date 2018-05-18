@@ -120,11 +120,22 @@
             <column name="date_expect" type="timestamp">
                 <constraints nullable="false" />
             </column>
-            <column name="product_counter" type="BIGINT">
-                <constraints nullable="false" />
-            </column>
             <column name="is_delivered" type="boolean">
                 <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="shipment_product">
+            <column name="shipment_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_shipment_shipment_product"
+                             references="shipment(id)" />
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_product_shipment_product"
+                             references="product(id)" />
+            </column>
+            <column name="product_counter" type="BIGINT">
+                <constraints nullable="false" />
             </column>
         </createTable>
 
@@ -196,29 +207,29 @@
             RETURNS trigger AS
             $$
             DECLARE
-            product_num bigint;
-            new_id bigint;
+                product_num bigint;
+                new_id bigint;
             BEGIN
-            product_num := NEW.product_counter;
+                product_num := NEW.product_counter;
 
-            IF product_num &gt; 10 THEN
-                WHILE product_num &gt; 0 LOOP
-                    new_id := (SELECT nextval('shipment_id_seq'));
+                IF product_num > 10 THEN
+                    WHILE product_num > 0 LOOP
+                        new_id := (SELECT nextval('shipment_id_seq'));
 
-                    IF product_num &gt;= 10 THEN
-                        INSERT INTO shipment(id, date_real, date_expect, product_counter)
-                        VALUES (new_id, NEW.date_real, NEW.date_expect, 10);
-                    ELSE
-                        INSERT INTO shipment(id, date_real, date_expect, product_counter)
-                        VALUES (new_id, NEW.date_real, NEW.date_expect, product_num);
-                    END IF;
+                        IF product_num >= 10 THEN
+                            INSERT INTO shipment_product(shipment_id, product_id, product_counter)
+                            VALUES (NEW.shipment_id, NEW.product_id, 10);
+                        ELSE
+                            INSERT INTO shipment_product(shipment_id, product_id, product_counter)
+                            VALUES (NEW.shipment_id, NEW.product_id, product_num);
+                        END IF;
 
-                    product_num := product_num - 10;
-                END LOOP;
-                RETURN NULL;
-            END IF;
+                        product_num := product_num - 10;
+                    END LOOP;
+                    RETURN NULL;
+                END IF;
 
-            RETURN NEW;
+                RETURN NEW;
             END;
             $$ LANGUAGE plpgsql;
         </createProcedure>
@@ -234,9 +245,9 @@
             EXECUTE PROCEDURE add_record_to_audit();
         </sql>
         <sql dbms="postgresql">
-            CREATE TRIGGER split_shipment
+            CREATE TRIGGER split_shipment_product
             BEFORE INSERT
-            ON shipment
+            ON shipment_product
             FOR EACH ROW
             EXECUTE PROCEDURE split_product_counter_by_10();
         </sql>
@@ -380,7 +391,6 @@
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
             <column name="date_real">2018-09-21</column>
             <column name="date_expect">2018-09-23</column>
-            <column name="product_counter">5</column>
             <column name="is_delivered">false</column>
         </insert>
         <!-- For debtors. -->
@@ -388,22 +398,42 @@
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
             <column name="date_real">2018-11-06</column>
             <column name="date_expect">2018-11-09</column>
-            <column name="product_counter">3</column>
             <column name="is_delivered">true</column>
         </insert>
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
             <column name="date_real">2018-08-15</column>
             <column name="date_expect">2018-08-18</column>
-            <column name="product_counter">2</column>
             <column name="is_delivered">true</column>
         </insert>
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
             <column name="date_real">2018-05-05</column>
             <column name="date_expect">2018-05-10</column>
-            <column name="product_counter">1</column>
             <column name="is_delivered">true</column>
+        </insert>
+        <!--===========-->
+
+        <insert tableName="shipment_product">
+            <column name="shipment_id">${shipment_id_10}</column>
+            <column name="product_id">${product_bred_id_10}</column>
+            <column name="product_counter">5</column>
+        </insert>
+        <!-- For debtors. -->
+        <insert tableName="shipment_product">
+            <column name="shipment_id">${shipment_id_12}</column>
+            <column name="product_id">${product_button_id_12}</column>
+            <column name="product_counter">3</column>
+        </insert>
+        <insert tableName="shipment_product">
+            <column name="shipment_id">${shipment_id_14}</column>
+            <column name="product_id">${product_water_id_14}</column>
+            <column name="product_counter">2</column>
+        </insert>
+        <insert tableName="shipment_product">
+            <column name="shipment_id">${shipment_id_16}</column>
+            <column name="product_id">${product_button_id_12}</column>
+            <column name="product_counter">1</column>
         </insert>
         <!--===========-->
     </changeSet>

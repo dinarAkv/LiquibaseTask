@@ -7,3 +7,11 @@ SELECT org.id, org.name, (ct.amount - pt.amount) AS Debt FROM organization org
 WHERE sh.is_delivered = TRUE
 ORDER BY (ct.amount - pt.amount) DESC
 
+
+
+-- 4. Показать самый популярный город доставки.
+
+SELECT Count(*) AS trips_num, loc.id, loc.city FROM location loc
+  INNER JOIN payment pt on loc.id = pt.location_id
+GROUP BY loc.id
+ORDER BY trips_num DESC LIMIT 1;
