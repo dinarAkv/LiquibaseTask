@@ -6,17 +6,37 @@
 
     <!-- Set ids from sequences using command: SELECT nextval('tableName_id_seq'). -->
     <property name="organization_id_10" value="10" />
+    <!-- Debtors. -->
     <property name="organization_id_12" value="12" />
+    <property name="organization_id_14" value="14" />
+    <property name="organization_id_16" value="16" />
+    <!-- ========= -->
 
     <property name="contract_id_10" value="10" />
+    <!-- For debtors. -->
+    <property name="contract_id_12" value="12" />
+    <property name="contract_id_14" value="14" />
+    <property name="contract_id_16" value="16" />
+    <property name="contract_id_18" value="18" />
+    <!-- =========== -->
 
-    <property name="location_id_10" value="10" />
+    <property name="location_moscow_id_10" value="10" />
+    <property name="location_smolensk_id_12" value="12" />
+    <property name="location_perm_id_14" value="14" />
 
     <property name="payment_id_10" value="10" />
 
-    <property name="product_id_10" value="10" />
+    <property name="product_bred_id_10" value="10" />
+    <property name="product_button_id_12" value="12" />
+    <property name="product_water_id_14" value="14" />
+
 
     <property name="shipment_id_10" value="10" />
+    <!-- For debtors. -->
+    <property name="shipment_id_12" value="12" />
+    <property name="shipment_id_14" value="14" />
+    <property name="shipment_id_16" value="16" />
+    <!-- =========== -->
 
     <property name="audit_id_10" value="10" />
 
@@ -100,6 +120,12 @@
             <column name="date_expect" type="timestamp">
                 <constraints nullable="false" />
             </column>
+            <column name="product_counter" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="is_delivered" type="boolean">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <createTable tableName="payment">
@@ -164,6 +190,38 @@
             END
             $$ LANGUAGE plpgsql;
         </createProcedure>
+
+        <createProcedure dbms="postgresql">
+            CREATE OR REPLACE FUNCTION split_product_counter_by_10()
+            RETURNS trigger AS
+            $$
+            DECLARE
+            product_num bigint;
+            new_id bigint;
+            BEGIN
+            product_num := NEW.product_counter;
+
+            IF product_num &gt; 10 THEN
+                WHILE product_num &gt; 0 LOOP
+                    new_id := (SELECT nextval('shipment_id_seq'));
+
+                    IF product_num &gt;= 10 THEN
+                        INSERT INTO shipment(id, date_real, date_expect, product_counter)
+                        VALUES (new_id, NEW.date_real, NEW.date_expect, 10);
+                    ELSE
+                        INSERT INTO shipment(id, date_real, date_expect, product_counter)
+                        VALUES (new_id, NEW.date_real, NEW.date_expect, product_num);
+                    END IF;
+
+                    product_num := product_num - 10;
+                END LOOP;
+                RETURN NULL;
+            END IF;
+
+            RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        </createProcedure>
     </changeSet>
 
 
@@ -174,6 +232,13 @@
             ON contract
             FOR EACH ROW
             EXECUTE PROCEDURE add_record_to_audit();
+        </sql>
+        <sql dbms="postgresql">
+            CREATE TRIGGER split_shipment
+            BEFORE INSERT
+            ON shipment
+            FOR EACH ROW
+            EXECUTE PROCEDURE split_product_counter_by_10();
         </sql>
     </changeSet>
 
@@ -235,49 +300,171 @@
     <changeSet id="5" author="dinar">
 
         <insert tableName="organization">
-            <column name="id">${organization_id_10}</column>
+            <column name="id" valueComputed="(SELECT nextval('organization_id_seq'))" />
             <column name="name">Org1</column>
         </insert>
+        <!-- Debtors. -->
         <insert tableName="organization">
-            <column name="id">${organization_id_12}</column>
-            <column name="name">Org2</column>
+            <column name="id" valueComputed="(SELECT nextval('organization_id_seq'))" />
+            <column name="name">DebtorOrg2</column>
         </insert>
+        <insert tableName="organization">
+            <column name="id" valueComputed="(SELECT nextval('organization_id_seq'))" />
+            <column name="name">DebtorOrg3</column>
+        </insert>
+        <insert tableName="organization">
+            <column name="id" valueComputed="(SELECT nextval('organization_id_seq'))" />
+            <column name="name">DebtorOrg4</column>
+        </insert>
+        <!--===========-->
 
         <insert tableName="product">
-            <column name="id">${product_id_10}</column>
+            <column name="id" valueComputed="(SELECT nextval('product_id_seq'))" />
             <column name="name">bred</column>
         </insert>
+        <insert tableName="product">
+            <column name="id" valueComputed="(SELECT nextval('product_id_seq'))" />
+            <column name="name">button</column>
+        </insert>
+        <insert tableName="product">
+            <column name="id" valueComputed="(SELECT nextval('product_id_seq'))" />
+            <column name="name">water</column>
+        </insert>
+
 
         <insert tableName="location">
-            <column name="id">${location_id_10}</column>
+            <column name="id" valueComputed="(SELECT nextval('location_id_seq'))" />
             <column name="city">Moscow</column>
             <column name="address">123 Lenina street</column>
         </insert>
+        <insert tableName="location">
+            <column name="id" valueComputed="(SELECT nextval('location_id_seq'))" />
+            <column name="city">Smolensk</column>
+            <column name="address">35 Petrova street</column>
+        </insert>
+        <insert tableName="location">
+            <column name="id" valueComputed="(SELECT nextval('location_id_seq'))" />
+            <column name="city">Perm</column>
+            <column name="address">12 Sadovaya street</column>
+        </insert>
 
         <insert tableName="contract">
-            <column name="id">${contract_id_10}</column>
+            <column name="id" valueComputed="(SELECT nextval('contract_id_seq'))" />
             <column name="amount">200</column>
+            <column name="details">Simple contract.</column>
+        </insert>
+        <!-- For debtors. -->
+        <insert tableName="contract">
+            <column name="id" valueComputed="(SELECT nextval('contract_id_seq'))" />
+            <column name="amount">500</column>
+            <column name="details">Simple contract2.</column>
+        </insert>
+        <insert tableName="contract">
+            <column name="id" valueComputed="(SELECT nextval('contract_id_seq'))" />
+            <column name="amount">600</column>
+            <column name="details">Simple contract3.</column>
+        </insert>
+        <insert tableName="contract">
+            <column name="id" valueComputed="(SELECT nextval('contract_id_seq'))" />
+            <column name="amount">700</column>
+            <column name="details">Simple contract4.</column>
+        </insert>
+        <!--=============-->
+        <insert tableName="contract">
+            <column name="id" valueComputed="(SELECT nextval('contract_id_seq'))" />
+            <column name="amount">320</column>
             <column name="details">Simple contract.</column>
         </insert>
 
         <insert tableName="shipment">
-            <column name="id">${shipment_id_10}</column>
+            <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
             <column name="date_real">2018-09-21</column>
             <column name="date_expect">2018-09-23</column>
+            <column name="product_counter">5</column>
+            <column name="is_delivered">false</column>
         </insert>
+        <!-- For debtors. -->
+        <insert tableName="shipment">
+            <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
+            <column name="date_real">2018-11-06</column>
+            <column name="date_expect">2018-11-09</column>
+            <column name="product_counter">3</column>
+            <column name="is_delivered">true</column>
+        </insert>
+        <insert tableName="shipment">
+            <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
+            <column name="date_real">2018-08-15</column>
+            <column name="date_expect">2018-08-18</column>
+            <column name="product_counter">2</column>
+            <column name="is_delivered">true</column>
+        </insert>
+        <insert tableName="shipment">
+            <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
+            <column name="date_real">2018-05-05</column>
+            <column name="date_expect">2018-05-10</column>
+            <column name="product_counter">1</column>
+            <column name="is_delivered">true</column>
+        </insert>
+        <!--===========-->
     </changeSet>
 
     <changeSet id="6" author="dinar">
         <insert tableName="payment">
-            <column name="id">${payment_id_10}</column>
+            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
             <column name="type">Payment for goods</column>
             <column name="date">2018-09-21</column>
             <column name="amount">400</column>
             <column name="organization_id">${organization_id_10}</column>
-            <column name="product_id">${product_id_10}</column>
-            <column name="location_id">${location_id_10}</column>
+            <column name="product_id">${product_bred_id_10}</column>
+            <column name="location_id">${location_moscow_id_10}</column>
             <column name="contract_id">${contract_id_10}</column>
             <column name="shipment_id">${shipment_id_10}</column>
+        </insert>
+        <!-- For debtors. -->
+        <insert tableName="payment">
+            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+            <column name="type">Payment for goods</column>
+            <column name="date">2018-04-21</column>
+            <column name="amount">100</column>
+            <column name="organization_id">${organization_id_12}</column>
+            <column name="product_id">${product_button_id_12}</column>
+            <column name="location_id">${location_smolensk_id_12}</column>
+            <column name="contract_id">${contract_id_12}</column>
+            <column name="shipment_id">${shipment_id_12}</column>
+        </insert>
+        <insert tableName="payment">
+            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+            <column name="type">Payment for goods</column>
+            <column name="date">2018-03-12</column>
+            <column name="amount">400</column>
+            <column name="organization_id">${organization_id_14}</column>
+            <column name="product_id">${product_water_id_14}</column>
+            <column name="location_id">${location_perm_id_14}</column>
+            <column name="contract_id">${contract_id_14}</column>
+            <column name="shipment_id">${shipment_id_14}</column>
+        </insert>
+        <insert tableName="payment">
+            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+            <column name="type">Payment for goods</column>
+            <column name="date">2018-01-25</column>
+            <column name="amount">450</column>
+            <column name="organization_id">${organization_id_16}</column>
+            <column name="product_id">${product_button_id_12}</column>
+            <column name="location_id">${location_smolensk_id_12}</column>
+            <column name="contract_id">${contract_id_16}</column>
+            <column name="shipment_id">${shipment_id_16}</column>
+        </insert>
+        <!-- ============ -->
+        <insert tableName="payment">
+            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+            <column name="type">Payment for goods</column>
+            <column name="date">2018-04-21</column>
+            <column name="amount">320</column>
+            <column name="organization_id">${organization_id_12}</column>
+            <column name="product_id">${product_button_id_12}</column>
+            <column name="location_id">${location_smolensk_id_12}</column>
+            <column name="contract_id">${contract_id_18}</column>
+            <column name="shipment_id">${shipment_id_12}</column>
         </insert>
     </changeSet>
 
