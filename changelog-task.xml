@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <!-- Set ids from sequences using command: SELECT nextval('tableName_id_seq'). -->
+    <!-- Set ids from sequences. -->
     <property name="organization_id_10" value="10" />
     <!-- Debtors. -->
     <property name="organization_id_12" value="12" />
@@ -568,12 +568,6 @@
             <column name="receipt_date_expect">2018-03-19</column>
             <column name="is_delivered">true</column>
         </insert>
-
-
-
-
-
-
     </changeSet>
 
 
@@ -694,9 +688,6 @@
             <column name="product_counter" />
         </createIndex>
     </changeSet>
-
-
-
 
 </databaseChangeLog>
 
