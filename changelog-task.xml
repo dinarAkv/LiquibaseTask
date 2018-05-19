@@ -330,7 +330,7 @@
 
 
     <!-- Fill data for simple tables. -->
-    <changeSet id="5" author="dinar">
+    <changeSet id="insert_data" author="dinar">
 
         <insert tableName="organization">
             <column name="id" valueComputed="(SELECT nextval('organization_id_seq'))" />
@@ -355,6 +355,9 @@
             <column name="name">Org5</column>
         </insert>
 
+
+
+
         <insert tableName="product">
             <column name="id" valueComputed="(SELECT nextval('product_id_seq'))" />
             <column name="name">bred</column>
@@ -367,6 +370,8 @@
             <column name="id" valueComputed="(SELECT nextval('product_id_seq'))" />
             <column name="name">water</column>
         </insert>
+
+
 
 
         <insert tableName="location">
@@ -384,6 +389,9 @@
             <column name="city">Perm</column>
             <column name="address">12 Sadovaya street</column>
         </insert>
+
+
+
 
         <insert tableName="contract">
             <column name="id" valueComputed="(SELECT nextval('contract_id_seq'))" />
@@ -412,6 +420,9 @@
             <column name="amount">320</column>
             <column name="details">Simple contract.</column>
         </insert>
+
+
+
 
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
@@ -457,6 +468,8 @@
         </insert>
 
 
+
+
         <insert tableName="shipment_product">
             <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
             <column name="shipment_id">${shipment_id_10}</column>
@@ -490,9 +503,9 @@
             <column name="product_counter">9</column>
         </insert>
 
-    </changeSet>
 
-    <changeSet id="6" author="dinar">
+
+
         <insert tableName="payment">
             <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
             <column name="type">Payment for goods</column>
@@ -545,7 +558,35 @@
             <column name="location_id">${location_smolensk_id_12}</column>
             <column name="contract_id">${contract_id_18}</column>
         </insert>
+
     </changeSet>
+
+    <changeSet id="set_indexes" author="dinar">
+        <createIndex tableName="shipment" indexName="shipment_date_real">
+            <column name="shipment_date_real" />
+        </createIndex>
+        <createIndex tableName="shipment" indexName="receipt_date_real">
+            <column name="receipt_date_real" />
+        </createIndex>
+
+
+        <createIndex tableName="payment" indexName="payment_amount">
+            <column name="amount" />
+        </createIndex>
+
+
+        <createIndex tableName="contract" indexName="contract_amount">
+            <column name="amount" />
+        </createIndex>
+
+
+        <createIndex tableName="shipment_product" indexName="shipment_product_counter">
+            <column name="product_counter" />
+        </createIndex>
+    </changeSet>
+
+
+
 
 </databaseChangeLog>
 
