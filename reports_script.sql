@@ -34,3 +34,10 @@ SELECT Count(*) AS trips_num, loc.id, loc.city FROM location loc
 GROUP BY loc.id
 ORDER BY trips_num DESC LIMIT 1;
 
+-- 5. Показать информацию по самым долгим, в плане доставки, направлениям
+
+SELECT loc.id, loc.city, EXTRACT(DAYS FROM MAX(sh.receipt_date_real - sh.shipment_date_real)) AS days FROM location loc
+  INNER JOIN payment pt on loc.id = pt.location_id
+  INNER JOIN shipment_product shpr on pt.shipment_product_id = shpr.id
+  INNER JOIN shipment sh on shpr.shipment_id = sh.id
+GROUP BY loc.id;

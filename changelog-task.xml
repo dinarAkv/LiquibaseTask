@@ -124,10 +124,16 @@
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" />
             </column>
-            <column name="date_real" type="timestamp">
+            <column name="shipment_date_real" type="timestamp">
                 <constraints nullable="false" />
             </column>
-            <column name="date_expect" type="timestamp">
+            <column name="shipment_date_expect" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="receipt_date_real" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="receipt_date_expect" type="timestamp">
                 <constraints nullable="false" />
             </column>
             <column name="is_delivered" type="boolean">
@@ -409,34 +415,44 @@
 
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
-            <column name="date_real">2018-09-21</column>
-            <column name="date_expect">2018-09-23</column>
+            <column name="shipment_date_real">2018-09-21</column>
+            <column name="shipment_date_expect">2018-09-20</column>
+            <column name="receipt_date_real">2018-09-28</column>
+            <column name="receipt_date_expect">2018-09-27</column>
             <column name="is_delivered">false</column>
         </insert>
         <!-- For debtors. -->
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
-            <column name="date_real">2018-11-06</column>
-            <column name="date_expect">2018-11-09</column>
+            <column name="shipment_date_real">2018-11-09</column>
+            <column name="shipment_date_expect">2018-11-06</column>
+            <column name="receipt_date_real">2018-11-11</column>
+            <column name="receipt_date_expect">2018-11-14</column>
             <column name="is_delivered">true</column>
         </insert>
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
-            <column name="date_real">2018-08-15</column>
-            <column name="date_expect">2018-08-18</column>
+            <column name="shipment_date_real">2018-08-15</column>
+            <column name="shipment_date_expect">2018-08-15</column>
+            <column name="receipt_date_real">2018-09-12</column>
+            <column name="receipt_date_expect">2018-09-12</column>
             <column name="is_delivered">true</column>
         </insert>
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
-            <column name="date_real">2018-05-05</column>
-            <column name="date_expect">2018-05-10</column>
+            <column name="shipment_date_real">2018-05-06</column>
+            <column name="shipment_date_expect">2018-05-05</column>
+            <column name="receipt_date_real">2018-05-12</column>
+            <column name="receipt_date_expect">2018-05-11</column>
             <column name="is_delivered">true</column>
         </insert>
         <!--===========-->
         <insert tableName="shipment">
             <column name="id" valueComputed="(SELECT nextval('shipment_id_seq'))" />
-            <column name="date_real">2018-03-21</column>
-            <column name="date_expect">2018-04-26</column>
+            <column name="shipment_date_real">2018-03-18</column>
+            <column name="shipment_date_expect">2018-03-10</column>
+            <column name="receipt_date_real">2018-03-28</column>
+            <column name="receipt_date_expect">2018-03-19</column>
             <column name="is_delivered">true</column>
         </insert>
 
