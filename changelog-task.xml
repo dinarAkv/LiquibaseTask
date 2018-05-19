@@ -175,36 +175,49 @@
     </changeSet>
 
 
-    <!-- Set functions. -->
-    <changeSet id="create_funcs" author="dinar">
+
+    <!-- Set constraints. -->
+    <changeSet id="set_constraints" author="dinar">
+        <!-- 1. Payment amount restriction: amount < 500.  -->
+        <sql dbms="postgresql" endDelimiter=";" >ALTER TABLE payment ADD CONSTRAINT check_max_amount CHECK (amount &lt; 500)</sql>
+
+        <!-- 2. Add record to audit if contract.amount > 1000. -->
         <createProcedure dbms="postgresql">
             CREATE OR REPLACE FUNCTION add_record_to_audit()
             RETURNS trigger AS
             $$
             DECLARE
-            new_audit_id bigint;
+                new_audit_id bigint;
             BEGIN
-            IF NEW.amount &gt; 1000 THEN
-            new_audit_id:= (SELECT nextval('audit_id_seq'));
-            INSERT INTO audit(id, contract_ident)
-            VALUES (new_audit_id, NEW.id);
-            end if;
-            RETURN NEW;
+                IF NEW.amount &gt; 1000 THEN
+                    new_audit_id:= (SELECT nextval('audit_id_seq'));
+                    INSERT INTO audit(id, contract_ident)
+                    VALUES (new_audit_id, NEW.id);
+                end if;
+                RETURN NEW;
             END
             $$ LANGUAGE plpgsql;
         </createProcedure>
+        <sql dbms="postgresql">
+            CREATE TRIGGER contract_amount_more_1000
+            AFTER INSERT
+            ON contract
+            FOR EACH ROW
+            EXECUTE PROCEDURE add_record_to_audit();
+        </sql>
 
+        <!-- 3. Split shipment_product record by 10 if product_counter > 10. -->
         <createProcedure dbms="postgresql">
             CREATE OR REPLACE FUNCTION split_product_counter_by_10()
             RETURNS trigger AS
             $$
             DECLARE
-                product_num bigint;
-                new_id bigint;
+            product_num bigint;
+            new_id bigint;
             BEGIN
                 product_num := NEW.product_counter;
 
-                IF product_num > 10 THEN
+                    IF product_num > 10 THEN
                     WHILE product_num > 0 LOOP
                         new_id := (SELECT nextval('shipment_id_seq'));
 
@@ -225,17 +238,6 @@
             END;
             $$ LANGUAGE plpgsql;
         </createProcedure>
-    </changeSet>
-
-
-    <changeSet id="create_triggers" author="dinar">
-        <sql dbms="postgresql">
-            CREATE TRIGGER contract_amount_more_1000
-            AFTER INSERT
-            ON contract
-            FOR EACH ROW
-            EXECUTE PROCEDURE add_record_to_audit();
-        </sql>
         <sql dbms="postgresql">
             CREATE TRIGGER split_shipment_product
             BEFORE INSERT
@@ -243,16 +245,6 @@
             FOR EACH ROW
             EXECUTE PROCEDURE split_product_counter_by_10();
         </sql>
-    </changeSet>
-
-
-
-    <!-- Set constraints. -->
-    <changeSet id="set_constraints" author="dinar">
-        <!-- Payment amount restriction: amount < 500.  -->
-        <sql dbms="postgresql" endDelimiter=";" >ALTER TABLE payment ADD CONSTRAINT check_max_amount CHECK (amount &lt; 500)</sql>
-
-
 
     </changeSet>
 
