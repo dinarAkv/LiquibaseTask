@@ -51,30 +51,6 @@
     <property name="audit_id_10" value="10" />
 
 
-    <!--<changeSet id="clear_data" author="dinar">-->
-        <!--<dropTable tableName="payment"/>-->
-        <!--<dropTable tableName="organization"/>-->
-        <!--<dropTable tableName="contract"/>-->
-        <!--<dropTable tableName="location"/>-->
-        <!--<dropTable tableName="product"/>-->
-        <!--<dropTable tableName="shipment"/>-->
-
-        <!--<dropSequence sequenceName="contract_id_seq" />-->
-        <!--<dropSequence sequenceName="location_id_seq" />-->
-        <!--<dropSequence sequenceName="organization_id_seq" />-->
-        <!--<dropSequence sequenceName="payment_id_seq" />-->
-        <!--<dropSequence sequenceName="product_id_seq" />-->
-        <!--<dropSequence sequenceName="shipment_id_seq" />-->
-        <!--<dropSequence sequenceName="audit_id_seq" />-->
-
-        <!--<sql dbms="postgresql" endDelimiter=";">-->
-            <!--DROP TRIGGER contract_amount_more_1000 ON contract-->
-        <!--</sql>-->
-        <!--<sql dbms="postgresql" endDelimiter=";">-->
-            <!--DROP FUNCTION add_record_to_audit()-->
-        <!--</sql>-->
-    <!--</changeSet>-->
-
 
     <!-- Create tables. -->
     <changeSet id="create_table" author="dinar">
@@ -146,8 +122,7 @@
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="shipment_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="fk_shipment_shipment_product"
-                             references="shipment(id)" />
+                <constraints nullable="false" />
             </column>
             <column name="product_id" type="BIGINT">
                 <constraints nullable="false" foreignKeyName="fk_product_shipment_product"
@@ -234,11 +209,11 @@
                         new_id := (SELECT nextval('shipment_id_seq'));
 
                         IF product_num >= 10 THEN
-                            INSERT INTO shipment_product(shipment_id, product_id, product_counter)
-                            VALUES (NEW.shipment_id, NEW.product_id, 10);
+                            INSERT INTO shipment_product(id, shipment_id, product_id, product_counter)
+                            VALUES ((SELECT nextval('shipment_product_id_seq')), NEW.shipment_id, NEW.product_id, 10);
                         ELSE
-                            INSERT INTO shipment_product(shipment_id, product_id, product_counter)
-                            VALUES (NEW.shipment_id, NEW.product_id, product_num);
+                            INSERT INTO shipment_product(id, shipment_id, product_id, product_counter)
+                            VALUES ((SELECT nextval('shipment_product_id_seq')), NEW.shipment_id, NEW.product_id, product_num);
                         END IF;
 
                         product_num := product_num - 10;
@@ -327,6 +302,141 @@
     </changeSet>
 
 
+
+
+    <changeSet id="make_partitioning" author="dinar">
+        <sql dbms="postgresql">
+            CREATE TABLE shipment_jan (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 1)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_feb (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 2)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_march (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 3)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_apr (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 4)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_may (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 5)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_june (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 6)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_jul (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 7)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_aug (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 8)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_sep (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 9)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_oct (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 10)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_nov (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 11)
+            ) INHERITS (shipment);
+
+            CREATE TABLE shipment_dec (
+            CHECK ( EXTRACT(MONTH FROM shipment_date_real) = 12)
+            ) INHERITS (shipment);
+        </sql>
+
+        <createProcedure dbms="postgresql">
+            CREATE OR REPLACE FUNCTION partitioning_shipment()
+                RETURNS TRIGGER AS
+                $$
+                BEGIN
+                    IF EXTRACT(MONTH FROM NEW.shipment_date_real) = 1 THEN
+                        INSERT INTO shipment_jan(id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                                        NEW.receipt_date_real, NEW.receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF EXTRACT(MONTH FROM NEW.shipment_date_real) = 2 THEN
+                        INSERT INTO shipment_feb(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 3 THEN
+                        INSERT INTO shipment_march(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 4 THEN
+                        INSERT INTO shipment_apr(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 5 THEN
+                        INSERT INTO shipment_may(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 6 THEN
+                        INSERT INTO shipment_june(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 7 THEN
+                        INSERT INTO shipment_jul(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 8 THEN
+                        INSERT INTO shipment_aug(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 9 THEN
+                        INSERT INTO shipment_sep(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 10 THEN
+                        INSERT INTO shipment_oct(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 11 THEN
+                        INSERT INTO shipment_nov(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSEIF  EXTRACT(MONTH FROM NEW.shipment_date_real) = 12 THEN
+                        INSERT INTO shipment_dec(id, shipment_date_real, shipment_date_expect, receipt_date_real,
+                        receipt_date_expect, is_delivered)
+                        VALUES (NEW.id, NEW.shipment_date_real, NEW.shipment_date_expect,
+                        NEW.receipt_date_real, NEW.receipt_date_expect, NEW.is_delivered);
+                    ELSE
+                        RAISE EXCEPTION 'Underfined month in shipment_date_real field.';
+                    END IF;
+                    RETURN NULL;
+                END;
+            $$
+            LANGUAGE plpgsql;
+        </createProcedure>
+
+        <sql dbms="postgresql">
+            CREATE TRIGGER partitioning_shipment_insert
+            BEFORE INSERT
+            ON shipment
+            FOR EACH ROW
+            EXECUTE PROCEDURE partitioning_shipment();
+        </sql>
+    </changeSet>
 
 
     <!-- Fill data for simple tables. -->
@@ -470,96 +580,104 @@
 
 
 
+
+
+    </changeSet>
+
+
+
+    <changeSet id="create_complex_tables" author="dinar">
         <insert tableName="shipment_product">
-            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
-            <column name="shipment_id">${shipment_id_10}</column>
-            <column name="product_id">${product_bred_id_10}</column>
-            <column name="product_counter">5</column>
+        <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
+        <column name="shipment_id">${shipment_id_10}</column>
+        <column name="product_id">${product_bred_id_10}</column>
+        <column name="product_counter">5</column>
         </insert>
         <!-- For debtors. -->
         <insert tableName="shipment_product">
-            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
-            <column name="shipment_id">${shipment_id_12}</column>
-            <column name="product_id">${product_button_id_12}</column>
-            <column name="product_counter">3</column>
+        <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
+        <column name="shipment_id">${shipment_id_12}</column>
+        <column name="product_id">${product_button_id_12}</column>
+        <column name="product_counter">3</column>
         </insert>
         <insert tableName="shipment_product">
-            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
-            <column name="shipment_id">${shipment_id_14}</column>
-            <column name="product_id">${product_water_id_14}</column>
-            <column name="product_counter">2</column>
+        <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
+        <column name="shipment_id">${shipment_id_14}</column>
+        <column name="product_id">${product_water_id_14}</column>
+        <column name="product_counter">2</column>
         </insert>
         <insert tableName="shipment_product">
-            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
-            <column name="shipment_id">${shipment_id_16}</column>
-            <column name="product_id">${product_button_id_12}</column>
-            <column name="product_counter">1</column>
+        <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
+        <column name="shipment_id">${shipment_id_16}</column>
+        <column name="product_id">${product_button_id_12}</column>
+        <column name="product_counter">1</column>
         </insert>
         <!--===========-->
         <insert tableName="shipment_product">
-            <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
-            <column name="shipment_id">${shipment_id_18}</column>
-            <column name="product_id">${product_water_id_14}</column>
-            <column name="product_counter">9</column>
+        <column name="id" valueComputed="(SELECT nextval('shipment_product_id_seq'))" />
+        <column name="shipment_id">${shipment_id_18}</column>
+        <column name="product_id">${product_water_id_14}</column>
+        <column name="product_counter">9</column>
         </insert>
 
 
 
 
         <insert tableName="payment">
-            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
-            <column name="type">Payment for goods</column>
-            <column name="date">2018-09-21</column>
-            <column name="amount">400</column>
-            <column name="organization_id">${organization_id_10}</column>
-            <column name="shipment_product_id">${shipment_product_id_10}</column>
-            <column name="location_id">${location_moscow_id_10}</column>
-            <column name="contract_id">${contract_id_10}</column>
+        <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+        <column name="type">Payment for goods</column>
+        <column name="date">2018-09-21</column>
+        <column name="amount">400</column>
+        <column name="organization_id">${organization_id_10}</column>
+        <column name="shipment_product_id">${shipment_product_id_10}</column>
+        <column name="location_id">${location_moscow_id_10}</column>
+        <column name="contract_id">${contract_id_10}</column>
         </insert>
         <!-- For debtors. -->
         <insert tableName="payment">
-            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
-            <column name="type">Payment for goods</column>
-            <column name="date">2018-04-21</column>
-            <column name="amount">100</column>
-            <column name="organization_id">${organization_id_12}</column>
-            <column name="shipment_product_id">${shipment_product_id_12}</column>
-            <column name="location_id">${location_smolensk_id_12}</column>
-            <column name="contract_id">${contract_id_12}</column>
+        <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+        <column name="type">Payment for goods</column>
+        <column name="date">2018-04-21</column>
+        <column name="amount">100</column>
+        <column name="organization_id">${organization_id_12}</column>
+        <column name="shipment_product_id">${shipment_product_id_12}</column>
+        <column name="location_id">${location_smolensk_id_12}</column>
+        <column name="contract_id">${contract_id_12}</column>
         </insert>
         <insert tableName="payment">
-            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
-            <column name="type">Payment for goods</column>
-            <column name="date">2018-03-12</column>
-            <column name="amount">400</column>
-            <column name="organization_id">${organization_id_14}</column>
-            <column name="location_id">${location_perm_id_14}</column>
-            <column name="contract_id">${contract_id_14}</column>
-            <column name="shipment_product_id">${shipment_product_id_14}</column>
+        <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+        <column name="type">Payment for goods</column>
+        <column name="date">2018-03-12</column>
+        <column name="amount">400</column>
+        <column name="organization_id">${organization_id_14}</column>
+        <column name="location_id">${location_perm_id_14}</column>
+        <column name="contract_id">${contract_id_14}</column>
+        <column name="shipment_product_id">${shipment_product_id_14}</column>
         </insert>
         <insert tableName="payment">
-            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
-            <column name="type">Payment for goods</column>
-            <column name="date">2018-01-25</column>
-            <column name="amount">450</column>
-            <column name="organization_id">${organization_id_16}</column>
-            <column name="shipment_product_id">${shipment_product_id_16}</column>
-            <column name="location_id">${location_smolensk_id_12}</column>
-            <column name="contract_id">${contract_id_16}</column>
+        <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+        <column name="type">Payment for goods</column>
+        <column name="date">2018-01-25</column>
+        <column name="amount">450</column>
+        <column name="organization_id">${organization_id_16}</column>
+        <column name="shipment_product_id">${shipment_product_id_16}</column>
+        <column name="location_id">${location_smolensk_id_12}</column>
+        <column name="contract_id">${contract_id_16}</column>
         </insert>
         <!-- ============ -->
         <insert tableName="payment">
-            <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
-            <column name="type">Payment for goods</column>
-            <column name="date">2018-04-21</column>
-            <column name="amount">320</column>
-            <column name="organization_id">${organization_id_18}</column>
-            <column name="shipment_product_id">${shipment_product_id_18}</column>
-            <column name="location_id">${location_smolensk_id_12}</column>
-            <column name="contract_id">${contract_id_18}</column>
+        <column name="id" valueComputed="(SELECT nextval('payment_id_seq'))" />
+        <column name="type">Payment for goods</column>
+        <column name="date">2018-04-21</column>
+        <column name="amount">320</column>
+        <column name="organization_id">${organization_id_18}</column>
+        <column name="shipment_product_id">${shipment_product_id_18}</column>
+        <column name="location_id">${location_smolensk_id_12}</column>
+        <column name="contract_id">${contract_id_18}</column>
         </insert>
-
     </changeSet>
+
+
 
     <changeSet id="set_indexes" author="dinar">
         <createIndex tableName="shipment" indexName="shipment_date_real">

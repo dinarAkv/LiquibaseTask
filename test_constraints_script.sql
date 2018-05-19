@@ -15,10 +15,11 @@ VALUES (101, 1500, 'Some details.');
 SELECT * FROM audit;
 
 -- 3. При организации доставки при количестве товаров больше 10, разбивать на 2 доставки с максимальным вложением 10.
-INSERT INTO shipment_product(shipment_id, product_id, product_counter)
-VALUES (10, 12, 35);
--- В таблице shipment_product вместо одной записи (10, 12, 35)
---  должно появиться 3 записи (10, 12, 10)
---                            (10, 12, 10)
---                            (10, 12, 10)
---                            (10, 12, 5).
+INSERT INTO shipment_product(id, shipment_id, product_id, product_counter)
+VALUES ((SELECT nextval('shipment_product_id_seq')), 10, 12, 35);
+-- В таблице shipment_product вместо одной записи (id, 10, 12, 35)
+--  должно появиться 3 записи (id, 10, 12, 10)
+--                            (id, 10, 12, 10)
+--                            (id, 10, 12, 10)
+--                            (id, 10, 12, 5).
+SELECT * FROM shipment_product;
